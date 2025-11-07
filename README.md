@@ -123,7 +123,7 @@ Assets/
 
 ## 👥 Equipe
 
-- **[Seu Nome]** - Desenvolvedor Principal
+- **Leonardo Almeida aka Leo Trely** - Desenvolvedor Principal e Game Designer
 - *(adicione os membros da equipe aqui)*
 
 ---
