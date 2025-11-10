@@ -30,7 +30,7 @@ Jogo de estratégia tático marxista-leninista para PC com arte pixel art inspir
 
 1. Clone o repositório:
 ```bash
-git clone [URL_DO_REPOSITORIO]
+git clone https://github.com/RedFootGames/red-grid
 ```
 
 2. Abra o projeto no Unity Hub:
