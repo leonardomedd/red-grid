@@ -115,7 +115,7 @@ Assets/
 
 ## 📚 Documentação
 
-- [GDD Completo](docs/GDD.md) *(criar depois)*
+- [GDD Completo]([docs/GDD.md](https://docs.google.com/document/d/1EWAGpJmRFijgyJ7zyK1wJJzKamnfXZGRU_ZONwNW67k/edit?tab=t.0#heading=h.1zui15deflmj)) *(criar depois)*
 - [Mecânicas](docs/MECHANICS.md) *(criar depois)*
 - [Arte e Estilo](docs/ART_STYLE.md) *(criar depois)*
 
