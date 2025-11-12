@@ -6,6 +6,7 @@ TagManager:
   tags:
   - Units
   - Structures
+  - Enemies
   layers:
   - Default
   - TransparentFX
@@ -14,7 +15,7 @@ TagManager:
   - Water
   - UI
   - 
-  - 
+  - Enemies
   - Units
   - Structures
   - 
