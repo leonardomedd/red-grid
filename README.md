@@ -46,13 +46,28 @@ git clone https://github.com/RedFootGames/red-grid
 ```
 Assets/
 ├── Prefabs/          # Prefabs de unidades, estruturas, UI
+│   ├── unit_militia_placeholder.prefab       # ComradeRecruit
+│   ├── unit_operario_placeholder.prefab      # WorkerBrigade
+│   ├── enemy_basic_placeholder.prefab        # BasicEnemy
+│   └── HealthBarCanvas.prefab                # UI de HP
 ├── Scenes/           # Cenas do jogo
 │   └── PlacementTest.unity  # Cena de teste do sistema de placement
 ├── Scripts/          # Scripts C#
 │   ├── Placement/    # Sistema de posicionamento
-│   ├── GhostFollower.cs
-│   ├── UnitCardUI.cs
-│   └── BuildProgressBar.cs
+│   │   ├── GhostFollower.cs
+│   │   ├── UnitCardUI.cs
+│   │   └── BuildProgressBar.cs
+│   ├── Units/        # Sistema de unidades e combate
+│   │   ├── UnitBase.cs           # Classe base abstrata
+│   │   ├── ComradeRecruit.cs     # Infantaria aliada
+│   │   ├── WorkerBrigade.cs      # Tank aliado
+│   │   └── BasicEnemy.cs         # Inimigo básico
+│   ├── UI/           # Interface de usuário
+│   │   └── HealthBar.cs          # Barras de vida
+│   ├── Debug/        # Ferramentas de debug
+│   │   ├── CombatTester.cs       # Spawner de teste
+│   │   └── UnitDebugger.cs       # Visualização de debug
+│   └── PlacerManager.cs
 ├── Sprites/          # Sprites pixel art
 ├── UI/               # Elementos de UI
 └── Settings/         # Configurações (URP, Input, etc)
@@ -69,20 +84,28 @@ Assets/
 - [x] UI básica (botões de unidades, texto de recrutamento)
 - [x] PlacerManager (gerenciamento de recursos)
 - [x] Câmera isométrica (Cinemachine)
-- [x] Tags e Layers configurados
+- [x] Tags e Layers configurados (Units, Enemies, Structures)
+- [x] **Sistema de combate com IA** ✨
+  - [x] UnitBase com state machine (Idle/Moving/Attacking/Dead)
+  - [x] Detecção automática de inimigos (Physics2D + LayerMask)
+  - [x] Movimento automático em direção ao alvo
+  - [x] Sistema de ataque com cooldown
+  - [x] Health/damage system com eventos
+  - [x] 3 unidades implementadas (ComradeRecruit, WorkerBrigade, BasicEnemy)
+  - [x] Health bars (sistema criado, UI pendente)
 
 ### 🚧 Em Desenvolvimento:
-- [ ] Sistema de combate (auto-resolve)
-- [ ] IA de inimigos
-- [ ] Sistema de ondas
-- [ ] Moral e Instabilidade
-- [ ] Líderes e cartas
+- [ ] Corrigir visualização das health bars
+- [ ] Sistema de ondas (WaveManager)
+- [ ] Mais tipos de unidades
+- [ ] Estruturas com habilidades ativas
 
 ### 📅 Próximos Passos:
-- Testar sistema de placement completo
-- Implementar unidades com comportamento básico
-- Criar sistema de ondas de inimigos
+- Balanceamento de unidades
+- Sistema de ondas progressivas
 - Arte pixel art definitiva
+- Moral e Instabilidade
+- Líderes e cartas
 
 ---
 
@@ -115,7 +138,8 @@ Assets/
 
 ## 📚 Documentação
 
-- [GDD Completo]([docs/GDD.md](https://docs.google.com/document/d/1EWAGpJmRFijgyJ7zyK1wJJzKamnfXZGRU_ZONwNW67k/edit?tab=t.0#heading=h.1zui15deflmj)) *(criar depois)*
+- [GDD Completo](https://docs.google.com/document/d/1EWAGpJmRFijgyJ7zyK1wJJzKamnfXZGRU_ZONwNW67k/edit?tab=t.0#heading=h.1zui15deflmj)
+- **[Sistema de Combate](COMBAT_SYSTEM.md)** - Documentação completa da IA e mecânicas de luta
 - [Mecânicas](docs/MECHANICS.md) *(criar depois)*
 - [Arte e Estilo](docs/ART_STYLE.md) *(criar depois)*
 
