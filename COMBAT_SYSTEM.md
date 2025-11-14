@@ -458,9 +458,26 @@ Die()
 
 ---
 
-## Problemas Conhecidos
+## Problemas Resolvidos
 
-### ❌ Health Bars não aparecem visualmente
+### ✅ LayerMask Detection Bug
+**Problema:** Physics2D.OverlapCircleAll retornava 0 hits com LayerMask  
+**Solução:** Usar `LayerMask.GetMask()` ao invés de bit-shifting manual
+
+### ✅ Rigidbody2D Movement Bug
+**Problema:** Unidades com Rigidbody2D não se moviam  
+**Soluções Aplicadas:**
+1. Usar `rb.MovePosition()` ao invés de `transform.position`
+2. Usar `Time.deltaTime` (não `Time.fixedDeltaTime`) em Update()
+3. Configurar Rigidbody2D como **Kinematic** (não Dynamic)
+4. Gravity Scale = 0
+5. Freeze Rotation Z ativado
+
+### ✅ Enemy Objective Assignment
+**Problema:** Inimigos tinham targetObjective mas `hasObjective = false`  
+**Solução:** Criar property setter que automaticamente seta a flag quando WaveManager atribui objetivo
+
+### ⏳ Health Bars não aparecem visualmente
 **Status:** Pendente investigação
 
 **Sintomas:**
@@ -483,18 +500,159 @@ Die()
 
 ### Melhorias Sugeridas
 1. ✅ Sistema de combate funcional
-2. ⏳ Corrigir health bars
-3. ⏳ Sistema de ondas (WaveManager)
-4. ⏳ Mais tipos de unidades (Intelligentsia, Sabotador, Comandante)
-5. ⏳ Estruturas com habilidades ativas
-6. ⏳ Sistema de Moral e Instabilidade
-7. ⏳ Cartas de líder e habilidades especiais
+2. ✅ Sistema de ondas (WaveManager)
+3. ✅ Ciclo completo de gameplay (placement → waves → vitória/derrota)
+4. ⏳ Corrigir health bars
+5. ⏳ Mais tipos de unidades (Intelligentsia, Sabotador, Comandante)
+6. ⏳ Estruturas com habilidades ativas
+7. ⏳ Sistema de Moral e Instabilidade
+8. ⏳ Cartas de líder e habilidades especiais
 
 ### Otimizações Futuras
 - Object pooling para unidades
 - Spatial partitioning para detecção de inimigos
 - Cache de LayerMask e componentes
 - Reduzir frequência de FindTarget() com timer
+
+---
+
+## Sistema de Ondas (Wave System)
+
+### Componentes Principais
+
+#### WaveManager.cs
+**Localização:** `Assets/Scripts/WaveManager.cs`
+
+Gerencia spawning de ondas de inimigos, progressão e condições de vitória/derrota.
+
+**Estruturas de Dados:**
+```csharp
+[Serializable]
+public struct Wave {
+    public string waveName;
+    public List<EnemySpawnData> enemies;
+}
+
+[Serializable]
+public struct EnemySpawnData {
+    public GameObject enemyPrefab;
+    public int count;
+}
+```
+
+**State Machine:**
+- **Waiting**: Aguarda timer para próxima wave
+- **Spawning**: Instanciando inimigos
+- **Fighting**: Inimigos ativos no campo
+- **Complete**: Todas as waves derrotadas
+
+**Eventos:**
+```csharp
+public event Action<int> OnWaveStart;
+public event Action<int> OnWaveComplete;
+public event Action OnAllWavesComplete; // Vitória
+public event Action OnGameOver;         // Derrota
+```
+
+#### PlayerCore.cs
+**Localização:** `Assets/Scripts/PlayerCore.cs`
+
+Representa o núcleo/base do jogador que deve ser defendido.
+
+**Stats:**
+- HP: 500 (padrão)
+- Tag: "PlayerCore"
+- Layer: Structures
+
+**Eventos:**
+```csharp
+public event Action<float, float> OnHealthChanged;
+public event Action OnDestroyed;
+```
+
+#### WaveUI.cs
+**Localização:** `Assets/Scripts/UI/WaveUI.cs`
+
+Interface mostrando informações das waves em tempo real.
+
+**Exibe:**
+- Número da wave atual
+- Inimigos restantes
+- Timer até próxima wave
+- Animação de início de wave
+- Painéis de vitória/derrota
+
+### Configuração de Waves
+
+**Exemplo de 3 Waves Balanceadas:**
+
+```
+Wave 1 - Tutorial (3 inimigos):
+- Familiarização com sistema
+- Tempo entre waves: 10s
+
+Wave 2 - Escalada (5 inimigos):
+- Aumento de dificuldade
+- Tempo entre waves: 10s
+
+Wave 3 - Desafio Final (8 inimigos):
+- Teste completo de defesa
+- Vitória ao derrotar todos
+```
+
+### Ciclo de Gameplay Completo
+
+```
+INÍCIO
+  ↓
+1. PLACEMENT PHASE
+   - Jogador posiciona unidades (recrutamento: 50)
+   - Usa sistema de drag-and-drop
+   ↓
+2. WAVE SYSTEM START
+   - WaveManager.StartWaveSystem()
+   - Timer inicia (10 segundos)
+   ↓
+3. WAVE 1 - Spawning
+   - 3 inimigos spawnam em spawn points
+   - Inimigos recebem PlayerCore como alvo
+   ↓
+4. COMBAT
+   - Inimigos se movem em direção ao core
+   - Aliados detectam e atacam (range 2.5)
+   - Sistema de dano/morte ativo
+   ↓
+5. WAVE COMPLETE
+   - Todos os inimigos derrotados
+   - Aguarda 10 segundos
+   ↓
+6. WAVE 2 - Spawning (5 inimigos)
+   - Repete ciclo de combate
+   ↓
+7. WAVE 3 - Spawning (8 inimigos)
+   - Última wave
+   ↓
+8. RESULTADO
+   ├─ VITÓRIA: Todas as waves derrotadas
+   │  - OnAllWavesComplete evento
+   │  - Victory UI exibida
+   │
+   └─ DERROTA: PlayerCore destruído
+      - OnGameOver evento
+      - Defeat UI exibida
+```
+
+### Recursos de Recrutamento
+
+**PlacerManager:**
+- Recrutamento Inicial: 50 pontos
+- ComradeRecruit: 3 pontos
+- WorkerBrigade: 5 pontos
+
+**Estratégia:**
+- 50 pontos permitem ~16 Comrades ou ~10 Brigades
+- Balancear quantidade vs. qualidade
+- Posicionamento estratégico é crucial
 
 ---
 
@@ -555,6 +713,6 @@ protected override void Attack() {
 
 ---
 
-**Última atualização:** 11 de Novembro de 2025  
+**Última atualização:** 13 de Novembro de 2025  
 **Versão do Unity:** 6 (2025) LTS  
-**Status:** Sistema core funcional ✅
+**Status:** Sistema core funcional ✅ | Wave System implementado ✅

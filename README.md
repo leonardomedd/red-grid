@@ -82,27 +82,33 @@ Assets/
 - [x] Ghost preview com validação de colisão
 - [x] Sistema de construção com barra de progresso
 - [x] UI básica (botões de unidades, texto de recrutamento)
-- [x] PlacerManager (gerenciamento de recursos)
+- [x] PlacerManager (gerenciamento de recursos - 50 pontos iniciais)
 - [x] Câmera isométrica (Cinemachine)
-- [x] Tags e Layers configurados (Units, Enemies, Structures)
+- [x] Tags e Layers configurados (Units, Enemies, Structures, PlayerCore)
 - [x] **Sistema de combate com IA** ✨
   - [x] UnitBase com state machine (Idle/Moving/Attacking/Dead)
   - [x] Detecção automática de inimigos (Physics2D + LayerMask)
-  - [x] Movimento automático em direção ao alvo
+  - [x] Movimento automático com Rigidbody2D
   - [x] Sistema de ataque com cooldown
   - [x] Health/damage system com eventos
   - [x] 3 unidades implementadas (ComradeRecruit, WorkerBrigade, BasicEnemy)
-  - [x] Health bars (sistema criado, UI pendente)
+- [x] **Sistema de Ondas (Wave System)** 🌊
+  - [x] WaveManager com spawn progressivo
+  - [x] 3 waves configuráveis (fácil, média, difícil)
+  - [x] PlayerCore com HP e detecção de destruição
+  - [x] Sistema de vitória (todas waves derrotadas)
+  - [x] Sistema de derrota (core destruído)
+  - [x] Timer entre waves (10 segundos)
+  - [x] WaveUI para informações em tempo real
 
 ### 🚧 Em Desenvolvimento:
 - [ ] Corrigir visualização das health bars
-- [ ] Sistema de ondas (WaveManager)
 - [ ] Mais tipos de unidades
 - [ ] Estruturas com habilidades ativas
+- [ ] Balanceamento de waves
 
 ### 📅 Próximos Passos:
-- Balanceamento de unidades
-- Sistema de ondas progressivas
+- Sistema de pontuação
 - Arte pixel art definitiva
 - Moral e Instabilidade
 - Líderes e cartas
@@ -140,6 +146,7 @@ Assets/
 
 - [GDD Completo](https://docs.google.com/document/d/1EWAGpJmRFijgyJ7zyK1wJJzKamnfXZGRU_ZONwNW67k/edit?tab=t.0#heading=h.1zui15deflmj)
 - **[Sistema de Combate](COMBAT_SYSTEM.md)** - Documentação completa da IA e mecânicas de luta
+- **[Sistema de Ondas](WAVE_SYSTEM_SETUP.md)** - Guia de configuração do WaveManager
 - [Mecânicas](docs/MECHANICS.md) *(criar depois)*
 - [Arte e Estilo](docs/ART_STYLE.md) *(criar depois)*
 

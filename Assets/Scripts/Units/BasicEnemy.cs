@@ -7,7 +7,17 @@ using UnityEngine;
 public class BasicEnemy : UnitBase
 {
     [Header("Enemy Settings")]
-    [SerializeField] private Transform targetObjective; // Objetivo a ser atacado (ex: base)
+    private GameObject _targetObjective; // Objetivo a ser atacado (ex: base)
+    public GameObject targetObjective 
+    { 
+        get => _targetObjective;
+        set 
+        { 
+            _targetObjective = value;
+            hasObjective = value != null;
+            Debug.Log($"[BasicEnemy] {name} objetivo setado para: {value?.name ?? "NULL"}, hasObjective: {hasObjective}");
+        }
+    }
     [SerializeField] private bool hasObjective = false;
 
     protected override void Awake()
@@ -39,6 +49,8 @@ public class BasicEnemy : UnitBase
         {
             FindObjective();
         }
+        
+        Debug.Log($"[BasicEnemy] {name} iniciado. TargetObjective: {targetObjective?.name ?? "NULL"}, hasObjective: {hasObjective}");
     }
 
     protected override void IdleBehavior()
@@ -46,8 +58,15 @@ public class BasicEnemy : UnitBase
         // Inimigos procuram alvos ou movem em direção ao objetivo
         base.IdleBehavior();
 
+        // Debug
+        if (Time.frameCount % 120 == 0)
+        {
+            Debug.Log($"[BasicEnemy] {name} IdleBehavior - currentTarget: {currentTarget?.name ?? "NULL"}, targetObjective: {targetObjective?.name ?? "NULL"}");
+        }
+
         // Se não tem alvo próximo, move em direção ao objetivo
-        if (currentTarget == null && hasObjective && targetObjective != null)
+        // Verifica se targetObjective existe (mesmo que hasObjective seja false)
+        if (currentTarget == null && targetObjective != null)
         {
             MoveTowardsObjective();
         }
@@ -57,8 +76,22 @@ public class BasicEnemy : UnitBase
     {
         if (targetObjective == null) return;
 
-        Vector2 direction = (targetObjective.position - transform.position).normalized;
-        transform.position += (Vector3)direction * moveSpeed * Time.deltaTime;
+        Debug.Log($"[BasicEnemy] {name} MOVENDO em direção a {targetObjective.name}");
+
+        Vector2 direction = (targetObjective.transform.position - transform.position).normalized;
+        
+        // Usa Rigidbody2D se disponível - CORRIGIDO: usar Time.deltaTime
+        if (rb != null)
+        {
+            Vector2 newPosition = rb.position + direction * moveSpeed * Time.deltaTime;
+            rb.MovePosition(newPosition);
+            Debug.Log($"[BasicEnemy] Usando Rigidbody2D - de {rb.position} para {newPosition}");
+        }
+        else
+        {
+            transform.position += (Vector3)direction * moveSpeed * Time.deltaTime;
+            Debug.Log($"[BasicEnemy] Usando Transform - nova posição: {transform.position}");
+        }
 
         // Flip sprite
         if (spriteRenderer != null && direction.x != 0)
@@ -67,10 +100,10 @@ public class BasicEnemy : UnitBase
         }
 
         // Se chegou perto do objetivo, ataca
-        float distance = Vector2.Distance(transform.position, targetObjective.position);
+        float distance = Vector2.Distance(transform.position, targetObjective.transform.position);
         if (distance <= attackRange)
         {
-            currentTarget = targetObjective;
+            currentTarget = targetObjective.transform;
             ChangeState(UnitState.Attacking);
         }
     }
@@ -94,7 +127,7 @@ public class BasicEnemy : UnitBase
         if (structures.Length > 0)
         {
             // Pega estrutura mais próxima
-            Transform closest = null;
+            GameObject closest = null;
             float closestDist = Mathf.Infinity;
 
             foreach (var structure in structures)
@@ -103,7 +136,7 @@ public class BasicEnemy : UnitBase
                 if (dist < closestDist)
                 {
                     closestDist = dist;
-                    closest = structure.transform;
+                    closest = structure;
                 }
             }
 
@@ -113,8 +146,9 @@ public class BasicEnemy : UnitBase
         else
         {
             // Fallback: move em direção ao centro do mapa
-            targetObjective = new GameObject("TempObjective").transform;
-            targetObjective.position = Vector3.zero;
+            GameObject tempObj = new GameObject("TempObjective");
+            tempObj.transform.position = Vector3.zero;
+            targetObjective = tempObj;
             hasObjective = true;
         }
     }

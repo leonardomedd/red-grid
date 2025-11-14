@@ -8,7 +8,7 @@ public class PlacerManager : MonoBehaviour
     public static PlacerManager Instance;
 
     [Header("Resources")]
-    public int currentRecruitment = 10;
+    public int currentRecruitment = 50; // Aumentado para permitir mais unidades no início
 
     [Header("Placement rules")]
     public LayerMask placementBlockMask; // Layers that block placement (Units+Structures)

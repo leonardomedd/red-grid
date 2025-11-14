@@ -30,7 +30,8 @@ public abstract class UnitBase : MonoBehaviour
     protected UnitState currentState = UnitState.Idle;
     protected Transform currentTarget;
     protected float lastAttackTime;
-    protected bool isDead = false;
+    public bool isDead = false; // Público para WaveManager verificar
+    protected Rigidbody2D rb; // Para movimento com física
 
     // Eventos (para UI, sons, etc)
     public delegate void UnitEvent(UnitBase unit);
@@ -52,6 +53,9 @@ public abstract class UnitBase : MonoBehaviour
         if (spriteRenderer == null)
             spriteRenderer = GetComponent<SpriteRenderer>();
         
+        // Pega Rigidbody2D se existir
+        rb = GetComponent<Rigidbody2D>();
+        
         currentHealth = maxHealth;
     }
 
@@ -65,15 +69,18 @@ public abstract class UnitBase : MonoBehaviour
                 gameObject.layer = LayerMask.NameToLayer("Enemies");
             else
                 gameObject.layer = LayerMask.NameToLayer("Units");
-                
-            layerName = LayerMask.LayerToName(gameObject.layer);
-            Debug.Log($"[{unitName}] Layer alterado para: {gameObject.layer} ({layerName})");
         }
     }
 
     protected virtual void Update()
     {
         if (isDead) return;
+
+        // Debug a cada 2 segundos
+        if (Time.frameCount % 120 == 0)
+        {
+            Debug.Log($"[{unitName}] Estado: {currentState}, Target: {currentTarget?.name ?? "NULL"}, Position: {transform.position}");
+        }
 
         // Máquina de estados simples
         switch (currentState)
@@ -123,7 +130,17 @@ public abstract class UnitBase : MonoBehaviour
 
         // Move em direção ao alvo
         Vector2 direction = (currentTarget.position - transform.position).normalized;
-        transform.position += (Vector3)direction * moveSpeed * Time.deltaTime;
+        
+        // Usa Rigidbody2D se disponível - CORRIGIDO: usar Time.deltaTime
+        if (rb != null)
+        {
+            Vector2 newPosition = rb.position + direction * moveSpeed * Time.deltaTime;
+            rb.MovePosition(newPosition);
+        }
+        else
+        {
+            transform.position += (Vector3)direction * moveSpeed * Time.deltaTime;
+        }
 
         // Flip sprite baseado na direção
         if (spriteRenderer != null && direction.x != 0)
@@ -169,7 +186,7 @@ public abstract class UnitBase : MonoBehaviour
     {
         if (currentTarget == null) return;
 
-        // Aplica dano ao alvo
+        // Tenta atacar unidade
         UnitBase targetUnit = currentTarget.GetComponent<UnitBase>();
         if (targetUnit != null)
         {
@@ -178,6 +195,19 @@ public abstract class UnitBase : MonoBehaviour
             
             // Debug visual
             Debug.DrawLine(transform.position, currentTarget.position, Color.red, 0.2f);
+            return;
+        }
+
+        // Tenta atacar Player Core
+        PlayerCore playerCore = currentTarget.GetComponent<PlayerCore>();
+        if (playerCore != null)
+        {
+            playerCore.TakeDamage(damage);
+            OnAttack?.Invoke(this);
+            
+            // Debug visual
+            Debug.DrawLine(transform.position, currentTarget.position, Color.red, 0.2f);
+            return;
         }
     }
     #endregion
