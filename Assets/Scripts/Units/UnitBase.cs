@@ -19,6 +19,15 @@ public abstract class UnitBase : MonoBehaviour
     [Header("Combat")]
     [SerializeField] protected LayerMask enemyLayer;
     [SerializeField] protected bool isEnemy = false; // false = aliado, true = inimigo
+    
+    [Header("Target Priority")]
+    public enum TargetPriority
+    {
+        Closest,        // Alvo mais próximo (padrão)
+        LowestHealth,   // Alvo mais fraco (menor HP)
+        HighestDamage   // Maior ameaça (maior dano)
+    }
+    [SerializeField] protected TargetPriority targetPriority = TargetPriority.Closest;
 
     [Header("Visual Feedback")]
     [SerializeField] protected SpriteRenderer spriteRenderer;
@@ -217,8 +226,8 @@ public abstract class UnitBase : MonoBehaviour
     {
         Collider2D[] hits = Physics2D.OverlapCircleAll(transform.position, attackRange * 1.5f, enemyLayer);
 
-        Transform closestEnemy = null;
-        float closestDistance = Mathf.Infinity;
+        Transform bestTarget = null;
+        float bestValue = Mathf.Infinity;
 
         foreach (var hit in hits)
         {
@@ -229,20 +238,47 @@ public abstract class UnitBase : MonoBehaviour
             UnitBase unit = hit.GetComponent<UnitBase>();
             if (unit != null && unit.isEnemy != this.isEnemy && !unit.isDead)
             {
-                float distance = Vector2.Distance(transform.position, hit.transform.position);
-                if (distance < closestDistance)
+                float value = CalculateTargetPriority(unit);
+                
+                if (value < bestValue)
                 {
-                    closestDistance = distance;
-                    closestEnemy = hit.transform;
+                    bestValue = value;
+                    bestTarget = hit.transform;
                 }
             }
         }
 
-        currentTarget = closestEnemy;
+        currentTarget = bestTarget;
         
         if (currentTarget != null && Time.frameCount % 60 == 0)
         {
-            Debug.Log($"[{unitName}] ✓ Alvo encontrado: {currentTarget.name} a {closestDistance:F2}m");
+            Debug.Log($"[{unitName}] ✓ Alvo encontrado: {currentTarget.name} (prioridade: {targetPriority})");
+        }
+    }
+
+    /// <summary>
+    /// Calcula prioridade do alvo baseado na estratégia configurada.
+    /// Retorna valor menor = maior prioridade
+    /// </summary>
+    protected virtual float CalculateTargetPriority(UnitBase target)
+    {
+        switch (targetPriority)
+        {
+            case TargetPriority.Closest:
+                // Menor distância = maior prioridade
+                return Vector2.Distance(transform.position, target.transform.position);
+
+            case TargetPriority.LowestHealth:
+                // Menor HP = maior prioridade (foca em eliminar alvos fracos)
+                return target.currentHealth;
+
+            case TargetPriority.HighestDamage:
+                // Maior dano = maior prioridade (neutraliza ameaças primeiro)
+                // Inverte o valor para que maior dano tenha menor número
+                return -target.damage;
+
+            default:
+                return Vector2.Distance(transform.position, target.transform.position);
         }
     }
     #endregion

@@ -169,11 +169,11 @@ protected override void MovingBehavior() {
 Inimigo básico que ataca unidades e estruturas.
 
 **Stats:**
-- HP: 60
-- Dano: 12
+- HP: 40
+- Dano: 10
 - Range: 2.0
-- Velocidade: 1.8
-- Attack Speed: 1.2
+- Velocidade: 2.2
+- Attack Speed: 1.3
 
 **IA - Busca de Objetivos:**
 ```csharp
@@ -198,6 +198,50 @@ private void FindObjective() {
 
 **Comportamento Idle:**
 - Se tiver unidade inimiga em range → ataca
+- Senão, move-se em direção ao objetivo (estrutura)
+
+---
+
+### 4. EnemyTank (Tanque Opressor) ✨ NOVO
+**Arquivo:** `Assets/Scripts/Units/EnemyTank.cs`
+
+Inimigo pesado blindado com alto HP e dano devastador.
+
+**Stats:**
+- HP: 150 (3.75x BasicEnemy)
+- Dano: 25 (2.5x BasicEnemy)
+- Range: 2.5
+- Velocidade: 1.2 (54% do BasicEnemy - MUITO LENTO)
+- Attack Speed: 2.0 (mais lento)
+- **Armadura: 30% de redução de dano** 🛡️
+
+**Mecânica Especial - Armadura:**
+```csharp
+[SerializeField] private float armorReduction = 0.3f; // 30%
+
+public override void TakeDamage(float damageAmount, UnitBase attacker) {
+    float reducedDamage = damageAmount * (1f - armorReduction);
+    base.TakeDamage(reducedDamage, attacker);
+}
+```
+
+**Papel Tático:**
+- Tanque de linha de frente
+- Absorve muito dano
+- Ameaça letal se chegar ao PlayerCore
+- Lento = vulnerável a kiting
+- Requer foco de fogo múltiplo para abater
+
+**Balanceamento:**
+```
+Força Equivalente: 1 Tank ≈ 4 BasicEnemies
+- 3.75x mais HP
+- 2.5x mais dano
+- 30% de redução de dano
+- MAS: 46% mais lento (janela maior para counter)
+```
+
+---
 - Senão, move-se em direção ao objetivo (estrutura)
 
 ---
@@ -233,6 +277,91 @@ enemyLayer = LayerMask.GetMask("Units", "Structures");
 ```
 
 **Motivo:** `LayerMask` é um struct, não um int. `LayerMask.GetMask()` cria a estrutura corretamente, enquanto bit-shifting manual cria apenas um int que não é reconhecido por `Physics2D.OverlapCircleAll()`.
+
+---
+
+## Sistema de Priorização de Alvos 🎯
+
+### Target Priority System
+**Implementado em:** `UnitBase.cs`
+
+Sistema configurável que permite cada unidade escolher qual inimigo atacar primeiro.
+
+#### Tipos de Priorização
+
+**1. Closest (Mais Próximo)** - Padrão
+```csharp
+targetPriority = TargetPriority.Closest;
+```
+- Ataca o inimigo mais próximo
+- Melhor para: Unidades defensivas, proteção de área
+- Minimiza movimento, maximiza DPS
+
+**2. LowestHealth (Mais Fraco)**
+```csharp
+targetPriority = TargetPriority.LowestHealth;
+```
+- Foca em eliminar alvos com menor HP
+- Melhor para: Finalizadores, limpeza rápida
+- Estratégia: Reduzir número de inimigos rapidamente
+
+**3. HighestDamage (Maior Ameaça)**
+```csharp
+targetPriority = TargetPriority.HighestDamage;
+```
+- Prioriza inimigos que causam mais dano
+- Melhor para: Proteção do core, controle de ameaças
+- Estratégia: Neutralizar perigos antes que causem estrago
+
+#### Implementação
+
+```csharp
+public enum TargetPriority {
+    Closest,        // Alvo mais próximo (padrão)
+    LowestHealth,   // Alvo mais fraco (menor HP)
+    HighestDamage   // Maior ameaça (maior dano)
+}
+
+[SerializeField] protected TargetPriority targetPriority = TargetPriority.Closest;
+
+protected virtual float CalculateTargetPriority(UnitBase target) {
+    switch (targetPriority) {
+        case TargetPriority.Closest:
+            return Vector2.Distance(transform.position, target.transform.position);
+        
+        case TargetPriority.LowestHealth:
+            return target.currentHealth;
+        
+        case TargetPriority.HighestDamage:
+            return -target.damage; // Negativo para inverter (maior = menor valor)
+        
+        default:
+            return Vector2.Distance(transform.position, target.transform.position);
+    }
+}
+```
+
+#### Uso Tático
+
+**Exemplo de Composição:**
+```
+Linha de Frente (WorkerBrigade):
+- Target Priority: HighestDamage
+- Papel: Protege o core neutralizando tanks inimigos
+
+Linha de Trás (ComradeRecruit):
+- Target Priority: LowestHealth
+- Papel: Finaliza inimigos feridos rapidamente
+
+Core Defense (Special Unit):
+- Target Priority: Closest
+- Papel: Resposta rápida a qualquer invasor
+```
+
+**Sinergia:**
+- Tanks aliados focam ameaças (EnemyTanks)
+- DPS foca alvos fracos (BasicEnemies feridos)
+- Elimina inimigos mais rápido = menos dano total recebido
 
 ---
 

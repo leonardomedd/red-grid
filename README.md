@@ -91,7 +91,12 @@ Assets/
   - [x] Movimento automático com Rigidbody2D
   - [x] Sistema de ataque com cooldown
   - [x] Health/damage system com eventos
-  - [x] 3 unidades implementadas (ComradeRecruit, WorkerBrigade, BasicEnemy)
+  - [x] Sistema de priorização de alvos (Closest/LowestHealth/HighestDamage) 🎯
+  - [x] 4 unidades implementadas:
+    - ComradeRecruit (aliado - infantaria)
+    - WorkerBrigade (aliado - tanque)
+    - BasicEnemy (inimigo - básico)
+    - EnemyTank (inimigo - tanque pesado) ✨ NOVO
 - [x] **Sistema de Ondas (Wave System)** 🌊
   - [x] WaveManager com spawn progressivo
   - [x] 3 waves configuráveis (fácil, média, difícil)
