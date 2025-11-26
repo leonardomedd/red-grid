@@ -1580,8 +1580,14 @@ MonoBehaviour:
       count: 5
   - waveName: Terceira Onda
     enemies:
+    - enemyPrefab: {fileID: 4060023845181858078, guid: ecf3e402e0aab984ca529e9fa7d4f485, type: 3}
+      count: 2
+  - waveName: Quarta Onda
+    enemies:
+    - enemyPrefab: {fileID: 4060023845181858078, guid: ecf3e402e0aab984ca529e9fa7d4f485, type: 3}
+      count: 2
     - enemyPrefab: {fileID: 7778827151469431695, guid: 997aa061263f31d41a4027438c0e68f8, type: 3}
-      count: 8
+      count: 4
   timeBetweenWaves: 10
   timeBetweenSpawns: 0.5
   spawnPoints:

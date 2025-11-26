@@ -2,6 +2,16 @@ using UnityEngine;
 using System.Collections;
 
 /// <summary>
+/// Tipos de priorização de alvos disponíveis
+/// </summary>
+public enum TargetPriority
+{
+    Closest,        // Alvo mais próximo (padrão)
+    LowestHealth,   // Alvo mais fraco (menor HP)
+    HighestDamage   // Maior ameaça (maior dano)
+}
+
+/// <summary>
 /// Classe base para todas as unidades do jogo.
 /// Define stats, estados e comportamentos comuns.
 /// </summary>
@@ -21,12 +31,6 @@ public abstract class UnitBase : MonoBehaviour
     [SerializeField] protected bool isEnemy = false; // false = aliado, true = inimigo
     
     [Header("Target Priority")]
-    public enum TargetPriority
-    {
-        Closest,        // Alvo mais próximo (padrão)
-        LowestHealth,   // Alvo mais fraco (menor HP)
-        HighestDamage   // Maior ameaça (maior dano)
-    }
     [SerializeField] protected TargetPriority targetPriority = TargetPriority.Closest;
 
     [Header("Visual Feedback")]
@@ -312,9 +316,17 @@ public abstract class UnitBase : MonoBehaviour
         isDead = true;
         currentState = UnitState.Dead;
         
+        Debug.Log($"{unitName} morreu!");
+        
+        // Dispara evento ANTES de iniciar destruição
         OnDeath?.Invoke(this);
 
-        Debug.Log($"{unitName} morreu!");
+        // Desabilita colliders para parar de receber ataques
+        Collider2D[] colliders = GetComponents<Collider2D>();
+        foreach (var col in colliders)
+        {
+            col.enabled = false;
+        }
 
         // Animação/efeito de morte (placeholder)
         StartCoroutine(DeathSequence());

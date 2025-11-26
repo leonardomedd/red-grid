@@ -233,21 +233,36 @@ public class WaveManager : MonoBehaviour
     {
         enemiesAlive--;
         Debug.Log($"[WaveManager] Inimigo morreu. Restantes: {enemiesAlive}");
+        
+        // Desinscreve do evento para evitar chamadas duplicadas
+        if (unit != null)
+        {
+            unit.OnDeath -= OnEnemyDied;
+        }
     }
 
     private void UpdateEnemyCount()
     {
         // Conta inimigos vivos manualmente (fallback se eventos falharem)
         GameObject[] enemies = GameObject.FindGameObjectsWithTag("Enemies");
-        enemiesAlive = 0;
+        int count = 0;
 
         foreach (GameObject enemy in enemies)
         {
+            if (enemy == null) continue; // Ignora objetos já destruídos
+            
             UnitBase unit = enemy.GetComponent<UnitBase>();
             if (unit != null && !unit.isDead)
             {
-                enemiesAlive++;
+                count++;
             }
+        }
+        
+        // Atualiza apenas se houver diferença significativa (evita bugs de sincronia)
+        if (count != enemiesAlive)
+        {
+            Debug.Log($"[WaveManager] Correção de contagem: {enemiesAlive} -> {count}");
+            enemiesAlive = count;
         }
     }
 
