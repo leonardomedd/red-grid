@@ -2,7 +2,7 @@
 
 ## 📋 Sobre o Projeto
 
-Jogo de estratégia tático marxista-leninista para PC com arte pixel art inspirada em pósters soviéticos e realismo socialista.
+Jogo de estratégia tático para PC com arte pixel art.
 
 **Engine:** Unity 6 (2025) LTS  
 **Estilo:** 2D Pixel Art, câmera isométrica  
@@ -159,7 +159,7 @@ Assets/
 
 ## 👥 Equipe
 
-- **Leonardo Almeida aka Leo Trely** - Desenvolvedor Principal e Game Designer
+- **Leonardo Almeida** - Desenvolvedor Principal e Game Designer
 - *(adicione os membros da equipe aqui)*
 
 ---
