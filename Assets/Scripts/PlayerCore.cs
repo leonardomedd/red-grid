@@ -51,7 +51,7 @@ public class PlayerCore : MonoBehaviour
             }
         }
 
-        Debug.Log($"[PlayerCore] Inicializado com {currentHealth}/{maxHealth} HP");
+        // Debug.Log($"[PlayerCore] Inicializado com {currentHealth}/{maxHealth} HP");
     }
 
     public void TakeDamage(float damage)
@@ -61,7 +61,7 @@ public class PlayerCore : MonoBehaviour
         currentHealth -= damage;
         currentHealth = Mathf.Max(0, currentHealth);
 
-        Debug.Log($"[PlayerCore] Dano recebido: {damage}. HP restante: {currentHealth}/{maxHealth}");
+        // Debug.Log($"[PlayerCore] Dano recebido: {damage}. HP restante: {currentHealth}/{maxHealth}");
 
         OnHealthChanged?.Invoke(currentHealth, maxHealth);
 

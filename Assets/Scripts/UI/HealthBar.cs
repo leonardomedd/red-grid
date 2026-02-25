@@ -48,7 +48,7 @@ public class HealthBar : MonoBehaviour
         // Esconde inicialmente se vida está cheia
         UpdateHealthBar();
         
-        Debug.Log($"[HealthBar] Inicializado para {unit.GetUnitName()}");
+        // Debug.Log($"[HealthBar] Inicializado para {unit.GetUnitName()}");
     }
 
     private void LateUpdate()

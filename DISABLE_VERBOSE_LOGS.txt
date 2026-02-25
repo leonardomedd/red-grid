@@ -1,0 +1,20 @@
+=== COMO DESABILITAR LOGS VERBOSOS ===
+
+Para facilitar o debug da fábrica, comentei a maioria dos logs de combate.
+
+Se quiser reativar, procure por linhas comentadas começando com:
+// Debug.Log
+
+Nos arquivos:
+- Assets/Scripts/Units/UnitBase.cs
+- Assets/Scripts/Units/BasicEnemy.cs
+- Assets/Scripts/WaveManager.cs
+
+Logs mantidos ATIVOS:
+- Todos de [FactoryProduction]
+- Debug.LogError e Debug.LogWarning (erros críticos)
+
+Para ver APENAS logs da fábrica no Console:
+1. Abra o Console (Window → General → Console)
+2. No campo de busca, digite: FactoryProduction
+3. Ou clique em "Clear" antes de testar a fábrica

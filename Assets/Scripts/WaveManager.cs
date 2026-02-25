@@ -62,7 +62,7 @@ public class WaveManager : MonoBehaviour
             if (coreObj != null)
             {
                 playerCore = coreObj;
-                Debug.Log("[WaveManager] Player Core encontrado automaticamente");
+                // Debug.Log("[WaveManager] Player Core encontrado automaticamente");
             }
             else
             {
@@ -112,11 +112,22 @@ public class WaveManager : MonoBehaviour
     private void UpdateFightingState()
     {
         // Verifica se todos os inimigos foram derrotados
-        UpdateEnemyCount();
+        // Atualiza a cada segundo para não sobrecarregar
+        if (Time.frameCount % 60 == 0)
+        {
+            UpdateEnemyCount();
+        }
 
         if (enemiesAlive <= 0)
         {
-            CompleteCurrentWave();
+            // Verificação final antes de completar
+            UpdateEnemyCount();
+            
+            if (enemiesAlive <= 0)
+            {
+                // Debug.Log("[WaveManager] Todos os inimigos eliminados! Completando wave...");
+                CompleteCurrentWave();
+            }
         }
     }
 
@@ -132,7 +143,7 @@ public class WaveManager : MonoBehaviour
         currentState = WaveState.Waiting;
         waveTimer = 0f;
         
-        Debug.Log($"[WaveManager] Sistema de waves iniciado. Total: {waves.Count} waves");
+        // Debug.Log($"[WaveManager] Sistema de waves iniciado. Total: {waves.Count} waves");
     }
 
     private void StartNextWave()
@@ -150,22 +161,32 @@ public class WaveManager : MonoBehaviour
 
     private IEnumerator SpawnWave(Wave wave)
     {
-        Debug.Log($"[WaveManager] Iniciando Wave {currentWaveIndex + 1}/{waves.Count}: {wave.waveName}");
+        // Debug.Log($"[WaveManager] ========== Iniciando Wave {currentWaveIndex + 1}/{waves.Count}: {wave.waveName} ==========");
         OnWaveStart?.Invoke(currentWaveIndex + 1);
 
+        int totalToSpawn = 0;
+        foreach (EnemySpawnData spawnData in wave.enemies)
+        {
+            totalToSpawn += spawnData.count;
+        }
+        // Debug.Log($"[WaveManager] Total de inimigos planejados para spawn: {totalToSpawn}");
+
         // Spawna cada grupo de inimigos
+        int spawnedCount = 0;
         foreach (EnemySpawnData spawnData in wave.enemies)
         {
             for (int i = 0; i < spawnData.count; i++)
             {
                 SpawnEnemy(spawnData.enemyPrefab);
+                spawnedCount++;
+                // Debug.Log($"[WaveManager] Spawnado {spawnedCount}/{totalToSpawn}");
                 yield return new WaitForSeconds(timeBetweenSpawns);
             }
         }
 
         // Todos os inimigos foram spawnados
         currentState = WaveState.Fighting;
-        Debug.Log($"[WaveManager] Wave {currentWaveIndex + 1} spawnada. Total de inimigos: {enemiesAlive}");
+        // Debug.Log($"[WaveManager] ========== Wave {currentWaveIndex + 1} spawnada completamente. Total enemiesAlive: {enemiesAlive} ==========");
     }
 
     private void SpawnEnemy(GameObject enemyPrefab)
@@ -189,31 +210,38 @@ public class WaveManager : MonoBehaviour
 
         // Spawna o inimigo
         GameObject enemy = Instantiate(enemyPrefab, spawnPosition, Quaternion.identity);
+        // Debug.Log($"[WaveManager] Instanciado: {enemy.name} em {spawnPosition}");
         
         // Configura o objetivo (core do jogador)
         BasicEnemy enemyScript = enemy.GetComponent<BasicEnemy>();
         if (enemyScript != null && playerCore != null)
         {
             enemyScript.targetObjective = playerCore;
-            Debug.Log($"[WaveManager] Inimigo {enemy.name} configurado para atacar {playerCore.name}");
+            // Debug.Log($"[WaveManager] → Configurado para atacar {playerCore.name}");
         }
         else
         {
             if (enemyScript == null)
-                Debug.LogError("[WaveManager] Enemy não tem componente BasicEnemy!");
+                Debug.LogError("[WaveManager] → Enemy não tem componente BasicEnemy!");
             if (playerCore == null)
-                Debug.LogError("[WaveManager] PlayerCore é null!");
+                Debug.LogError("[WaveManager] → PlayerCore é null!");
         }
 
-        // Incrementa contador
-        enemiesAlive++;
-
-        // Subscreve ao evento de morte
+        // Subscreve ao evento de morte ANTES de incrementar
         UnitBase unitBase = enemy.GetComponent<UnitBase>();
         if (unitBase != null)
         {
             unitBase.OnDeath += OnEnemyDied;
+            // Debug.Log($"[WaveManager] → Inscrito no evento OnDeath de {enemy.name}");
         }
+        else
+        {
+            Debug.LogError($"[WaveManager] → {enemy.name} não tem UnitBase! Não será rastreado!");
+        }
+
+        // Incrementa contador
+        enemiesAlive++;
+        // Debug.Log($"[WaveManager] → enemiesAlive agora é {enemiesAlive}");
     }
 
     private Transform GetSpawnPoint()
@@ -231,13 +259,22 @@ public class WaveManager : MonoBehaviour
 
     private void OnEnemyDied(UnitBase unit)
     {
-        enemiesAlive--;
-        Debug.Log($"[WaveManager] Inimigo morreu. Restantes: {enemiesAlive}");
+        // Null safety
+        if (unit == null) return;
         
         // Desinscreve do evento para evitar chamadas duplicadas
-        if (unit != null)
+        unit.OnDeath -= OnEnemyDied;
+        
+        // Decrementa com proteção contra valores negativos
+        enemiesAlive = Mathf.Max(0, enemiesAlive - 1);
+        
+        // Debug.Log($"[WaveManager] Inimigo morreu: {unit.name}. Restantes: {enemiesAlive}");
+        
+        // Força atualização quando está quase vazio para garantir consistência
+        if (enemiesAlive <= 1)
         {
-            unit.OnDeath -= OnEnemyDied;
+            // Debug.Log("[WaveManager] LAST ENEMY - forçando UpdateEnemyCount()");
+            UpdateEnemyCount();
         }
     }
 
@@ -246,29 +283,47 @@ public class WaveManager : MonoBehaviour
         // Conta inimigos vivos manualmente (fallback se eventos falharem)
         GameObject[] enemies = GameObject.FindGameObjectsWithTag("Enemies");
         int count = 0;
+        
+        // Debug.Log($"[WaveManager] UpdateEnemyCount - Total GameObjects com tag 'Enemies': {enemies.Length}, enemiesAlive atual: {enemiesAlive}");
 
         foreach (GameObject enemy in enemies)
         {
-            if (enemy == null) continue; // Ignora objetos já destruídos
+            // Verificação robusta: null e se o objeto ainda existe
+            if (enemy == null || !enemy)
+            {
+                // Debug.Log("[WaveManager] GameObject nulo ou destruído encontrado");
+                continue;
+            }
             
             UnitBase unit = enemy.GetComponent<UnitBase>();
-            if (unit != null && !unit.isDead)
+            if (unit == null)
+            {
+                Debug.LogWarning($"[WaveManager] GameObject {enemy.name} tem tag 'Enemies' mas sem UnitBase!");
+                continue;
+            }
+            
+            if (!unit.isDead)
             {
                 count++;
+                // Debug.Log($"[WaveManager] ✓ VIVO: {enemy.name} (isDead={unit.isDead})");
+            }
+            else
+            {
+                // Debug.Log($"[WaveManager] ✗ MORTO: {enemy.name} (isDead={unit.isDead}, aguardando destruição)");
             }
         }
         
         // Atualiza apenas se houver diferença significativa (evita bugs de sincronia)
         if (count != enemiesAlive)
         {
-            Debug.Log($"[WaveManager] Correção de contagem: {enemiesAlive} -> {count}");
+            // Debug.Log($"[WaveManager] Correção de contagem: {enemiesAlive} -> {count} inimigos vivos");
             enemiesAlive = count;
         }
     }
 
     private void CompleteCurrentWave()
     {
-        Debug.Log($"[WaveManager] Wave {currentWaveIndex + 1} completada!");
+        // Debug.Log($"[WaveManager] Wave {currentWaveIndex + 1} completada!");
         OnWaveComplete?.Invoke(currentWaveIndex + 1);
 
         currentWaveIndex++;
@@ -278,7 +333,7 @@ public class WaveManager : MonoBehaviour
 
     private void CompleteAllWaves()
     {
-        Debug.Log("[WaveManager] Todas as waves completadas! VITÓRIA!");
+        // Debug.Log("[WaveManager] Todas as waves completadas! VITÓRIA!");
         currentState = WaveState.Complete;
         gameEnded = true;
         OnAllWavesComplete?.Invoke();
@@ -288,7 +343,7 @@ public class WaveManager : MonoBehaviour
     {
         if (gameEnded) return;
 
-        Debug.Log("[WaveManager] Core destruído! DERROTA!");
+        // Debug.Log("[WaveManager] Core destruído! DERROTA!");
         gameEnded = true;
         currentState = WaveState.Complete;
         OnGameOver?.Invoke();

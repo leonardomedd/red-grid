@@ -30,6 +30,15 @@ public class EnemyTank : UnitBase
         // Define como inimigo
         isEnemy = true;
 
+        // CRITICAL: Garante que tem Collider2D para ser detectado
+        if (GetComponent<Collider2D>() == null)
+        {
+            CircleCollider2D collider = gameObject.AddComponent<CircleCollider2D>();
+            collider.radius = 0.6f; // Tanque um pouco maior
+            collider.isTrigger = false;
+            Debug.LogWarning($"[EnemyTank] {name} não tinha Collider2D! Adicionado automaticamente.");
+        }
+
         // Stats de tanque: MUITO HP, ALTO dano, LENTO
         unitName = "Tanque Opressor";
         maxHealth = 150f;      // 3.75x mais HP que BasicEnemy
@@ -43,6 +52,10 @@ public class EnemyTank : UnitBase
     protected override void Start()
     {
         base.Start();
+        
+        // FORÇA o layer correto (ignora configuração do prefab)
+        gameObject.layer = LayerMask.NameToLayer("Enemies");
+        Debug.Log($"[EnemyTank] {name} FORÇADO para layer Enemies (layer {gameObject.layer})");
         
         // Configura layer enemy
         enemyLayer = LayerMask.GetMask("Units", "Structures");

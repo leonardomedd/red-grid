@@ -479,6 +479,7 @@ MonoBehaviour:
   unitPrefab: {fileID: 4630226378740203638, guid: 64071442168949d4388c2ac16956c316, type: 3}
   cost: 3
   isStructure: 0
+  unitsPerPlacement: 1
 --- !u!114 &297401085
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1580,14 +1581,14 @@ MonoBehaviour:
       count: 5
   - waveName: Terceira Onda
     enemies:
-    - enemyPrefab: {fileID: 4060023845181858078, guid: ecf3e402e0aab984ca529e9fa7d4f485, type: 3}
-      count: 2
+    - enemyPrefab: {fileID: 4929621294820335502, guid: 3e2634eb93673434eb91571fece1b805, type: 3}
+      count: 3
   - waveName: Quarta Onda
     enemies:
-    - enemyPrefab: {fileID: 4060023845181858078, guid: ecf3e402e0aab984ca529e9fa7d4f485, type: 3}
-      count: 2
+    - enemyPrefab: {fileID: 4929621294820335502, guid: 3e2634eb93673434eb91571fece1b805, type: 3}
+      count: 3
     - enemyPrefab: {fileID: 7778827151469431695, guid: 997aa061263f31d41a4027438c0e68f8, type: 3}
-      count: 4
+      count: 6
   timeBetweenWaves: 10
   timeBetweenSpawns: 0.5
   spawnPoints:
@@ -1626,7 +1627,7 @@ GameObject:
   - component: {fileID: 900820315}
   - component: {fileID: 900820314}
   - component: {fileID: 900820313}
-  - component: {fileID: 900820312}
+  - component: {fileID: 900820316}
   m_Layer: 5
   m_Name: Button_Operario
   m_TagString: Untagged
@@ -1654,22 +1655,6 @@ RectTransform:
   m_AnchoredPosition: {x: 150, y: 0}
   m_SizeDelta: {x: 200, y: 120}
   m_Pivot: {x: 0.5, y: 0.5}
---- !u!114 &900820312
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 900820310}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 2a3e63841139ed6409bda5a8ce844883, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::UnitCardUI
-  ghostPrefab: {fileID: 5299461257095797976, guid: 19b097566e7fa1b498f7a4fc719b7151, type: 3}
-  unitPrefab: {fileID: 6784349554586580337, guid: 3bb48d053398db541a208403eb05da8e, type: 3}
-  cost: 1
-  isStructure: 0
 --- !u!114 &900820313
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1714,7 +1699,7 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 900820312}
+      - m_Target: {fileID: 900820316}
         m_TargetAssemblyTypeName: UnitCardUI, Assembly-CSharp
         m_MethodName: OnPickCard
         m_Mode: 1
@@ -1764,6 +1749,23 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 900820310}
   m_CullTransparentMesh: 1
+--- !u!114 &900820316
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 900820310}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2a3e63841139ed6409bda5a8ce844883, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::UnitCardUI
+  ghostPrefab: {fileID: 5299461257095797976, guid: 19b097566e7fa1b498f7a4fc719b7151, type: 3}
+  unitPrefab: {fileID: 6784349554586580337, guid: 3bb48d053398db541a208403eb05da8e, type: 3}
+  cost: 3
+  isStructure: 0
+  unitsPerPlacement: 3
 --- !u!1 &1010161509
 GameObject:
   m_ObjectHideFlags: 0

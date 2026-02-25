@@ -10,6 +10,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1034270897667927289}
   - component: {fileID: 2267839196073377682}
+  - component: {fileID: -8689094825753087067}
   m_Layer: 9
   m_Name: structure_factory_placeholder
   m_TagString: Structures
@@ -90,3 +91,26 @@ SpriteRenderer:
   m_WasSpriteAssigned: 1
   m_MaskInteraction: 0
   m_SpriteSortPoint: 0
+--- !u!114 &-8689094825753087067
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4630226378740203638}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 75f2a5428f3f1c541a0396c248909130, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::FactoryProduction
+  workerPrefab: {fileID: 6784349554586580337, guid: 3bb48d053398db541a208403eb05da8e, type: 3}
+  productionInterval: 10
+  spawnRadius: 1.5
+  autoStartProduction: 1
+  requiresResources: 0
+  productionCost: 0
+  hasProductionLimit: 0
+  maxUnitsProduced: -1
+  factoryRenderer: {fileID: 0}
+  producingColor: {r: 1, g: 1, b: 0, a: 0.5}
+  productionEffectPrefab: {fileID: 0}

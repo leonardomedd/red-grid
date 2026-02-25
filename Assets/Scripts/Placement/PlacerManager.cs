@@ -53,19 +53,21 @@ public class PlacerManager : MonoBehaviour
 
     public void RequestPlace(GameObject prefab, Vector2 worldPos, int cost, bool isStructure)
     {
+        RequestPlaceMultiple(prefab, worldPos, cost, isStructure, 1);
+    }
+
+    public void RequestPlaceMultiple(GameObject prefab, Vector2 worldPos, int cost, bool isStructure, int unitCount = 1)
+    {
         if (!CanAfford(cost))
         {
             Debug.Log("PlacerManager: sem recrutamento suficiente.");
-            // opcional: popup UI
             return;
         }
 
         float footprint = placementCheckRadius;
-        // use sprite bounds if prefab has SpriteRenderer
         var sr = prefab.GetComponent<SpriteRenderer>();
         if (sr != null)
         {
-            // approx radius from sprite bounds (half of max dimension)
             var size = sr.bounds.size;
             footprint = Mathf.Max(size.x, size.y) * 0.45f;
         }
@@ -73,7 +75,6 @@ public class PlacerManager : MonoBehaviour
         if (!ValidatePlacement(worldPos, footprint))
         {
             Debug.Log("PlacerManager: posição inválida/ocupada.");
-            // opcional: feedback visual
             return;
         }
 
@@ -81,8 +82,24 @@ public class PlacerManager : MonoBehaviour
         currentRecruitment -= cost;
         UpdateRecruitmentUI();
 
-        // start building coroutine
-        StartCoroutine(BuildCoroutine(prefab, worldPos, cost, isStructure));
+        // Spawnar múltiplas unidades com offset
+        if (unitCount > 1)
+        {
+            float offsetDistance = 0.8f; // Distância entre unidades
+            for (int i = 0; i < unitCount; i++)
+            {
+                // Calcula offset em círculo ao redor do ponto clicado
+                float angle = (360f / unitCount) * i * Mathf.Deg2Rad;
+                Vector2 offset = new Vector2(Mathf.Cos(angle), Mathf.Sin(angle)) * offsetDistance;
+                Vector2 spawnPos = worldPos + offset;
+                
+                StartCoroutine(BuildCoroutine(prefab, spawnPos, 0, isStructure)); // custo 0 pois já foi descontado
+            }
+        }
+        else
+        {
+            StartCoroutine(BuildCoroutine(prefab, worldPos, 0, isStructure));
+        }
     }
 
     IEnumerator BuildCoroutine(GameObject prefab, Vector2 worldPos, int cost, bool isStructure)

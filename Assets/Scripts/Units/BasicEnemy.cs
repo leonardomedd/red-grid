@@ -15,7 +15,7 @@ public class BasicEnemy : UnitBase
         { 
             _targetObjective = value;
             hasObjective = value != null;
-            Debug.Log($"[BasicEnemy] {name} objetivo setado para: {value?.name ?? "NULL"}, hasObjective: {hasObjective}");
+            // Debug.Log($"[BasicEnemy] {name} objetivo setado para: {value?.name ?? \"NULL\"}, hasObjective: {hasObjective}");
         }
     }
     [SerializeField] private bool hasObjective = false;
@@ -26,6 +26,31 @@ public class BasicEnemy : UnitBase
 
         // Define como inimigo ANTES de qualquer Start
         isEnemy = true;
+
+        // CRITICAL: Garante Rigidbody2D (OBRIGATÓRIO para Physics2D.OverlapCircleAll detectar!)
+        if (GetComponent<Rigidbody2D>() == null)
+        {
+            Rigidbody2D rb = gameObject.AddComponent<Rigidbody2D>();
+            rb.bodyType = RigidbodyType2D.Dynamic;
+            rb.gravityScale = 0f; // Sem gravidade para 2D top-down
+            rb.constraints = RigidbodyConstraints2D.FreezeRotation;
+            Debug.LogWarning($"[BasicEnemy] {name} não tinha Rigidbody2D! Adicionado automaticamente.");
+        }
+        
+        // CRITICAL: Garante que tem Collider2D para ser detectado
+        if (GetComponent<Collider2D>() == null)
+        {
+            CircleCollider2D collider = gameObject.AddComponent<CircleCollider2D>();
+            collider.radius = 0.5f;
+            collider.isTrigger = false; // Colisão física
+            Debug.LogWarning($"[BasicEnemy] {name} não tinha Collider2D! Adicionado automaticamente.");
+        }
+        else
+        {
+            // Garante que o collider não é trigger
+            Collider2D col = GetComponent<Collider2D>();
+            col.isTrigger = false;
+        }
 
         // Stats de inimigo básico
         unitName = "Reacionário";
@@ -41,6 +66,12 @@ public class BasicEnemy : UnitBase
     {
         base.Start();
         
+        // FORÇA o layer correto (ignora configuração do prefab)
+        gameObject.layer = LayerMask.NameToLayer("Enemies");
+        // Debug.Log($"[BasicEnemy] {name} FORÇADO para layer Enemies (layer {gameObject.layer})");
+        
+        Debug.Log($"[BasicEnemy] {name} SPAWNADO! Posição: {transform.position}, Layer: {gameObject.layer}, isEnemy: {isEnemy}");
+        
         // Configura layer enemy de forma explícita usando o método correto
         enemyLayer = LayerMask.GetMask("Units", "Structures");
 
@@ -50,7 +81,7 @@ public class BasicEnemy : UnitBase
             FindObjective();
         }
         
-        Debug.Log($"[BasicEnemy] {name} iniciado. TargetObjective: {targetObjective?.name ?? "NULL"}, hasObjective: {hasObjective}");
+        // Debug.Log($"[BasicEnemy] {name} iniciado. TargetObjective: {targetObjective?.name ?? \"NULL\"}, hasObjective: {hasObjective}");
     }
 
     protected override void IdleBehavior()
@@ -58,15 +89,24 @@ public class BasicEnemy : UnitBase
         // Inimigos procuram alvos ou movem em direção ao objetivo
         base.IdleBehavior();
 
-        // Debug
+        // Debug (com verificação de null safety)
         if (Time.frameCount % 120 == 0)
         {
-            Debug.Log($"[BasicEnemy] {name} IdleBehavior - currentTarget: {currentTarget?.name ?? "NULL"}, targetObjective: {targetObjective?.name ?? "NULL"}");
+            string targetName = currentTarget != null ? currentTarget.name : "NULL";
+            string objectiveName = "NULL";
+            
+            // Unity's destroyed object check: both reference check and Unity's implicit bool check
+            if (targetObjective != null && targetObjective)
+            {
+                objectiveName = targetObjective.name;
+            }
+            
+            // Debug.Log($"[BasicEnemy] {name} IdleBehavior - currentTarget: {targetName}, targetObjective: {objectiveName}");
         }
 
         // Se não tem alvo próximo, move em direção ao objetivo
-        // Verifica se targetObjective existe (mesmo que hasObjective seja false)
-        if (currentTarget == null && targetObjective != null)
+        // Verifica se targetObjective existe E não foi destruído
+        if (currentTarget == null && targetObjective != null && targetObjective)
         {
             MoveTowardsObjective();
         }
@@ -74,23 +114,28 @@ public class BasicEnemy : UnitBase
 
     private void MoveTowardsObjective()
     {
-        if (targetObjective == null) return;
+        // Verificação dupla: null e se o objeto ainda existe
+        if (targetObjective == null || !targetObjective) return;
 
-        Debug.Log($"[BasicEnemy] {name} MOVENDO em direção a {targetObjective.name}");
+        // Safe access to transform
+        Transform objTransform = targetObjective.transform;
+        if (objTransform == null) return;
+        
+        // Debug.Log($"[BasicEnemy] {name} MOVENDO em direção a {targetObjective.name}");
 
-        Vector2 direction = (targetObjective.transform.position - transform.position).normalized;
+        Vector2 direction = (objTransform.position - transform.position).normalized;
         
         // Usa Rigidbody2D se disponível - CORRIGIDO: usar Time.deltaTime
         if (rb != null)
         {
             Vector2 newPosition = rb.position + direction * moveSpeed * Time.deltaTime;
             rb.MovePosition(newPosition);
-            Debug.Log($"[BasicEnemy] Usando Rigidbody2D - de {rb.position} para {newPosition}");
+            // Debug.Log($"[BasicEnemy] Usando Rigidbody2D - de {rb.position} para {newPosition}");
         }
         else
         {
             transform.position += (Vector3)direction * moveSpeed * Time.deltaTime;
-            Debug.Log($"[BasicEnemy] Usando Transform - nova posição: {transform.position}");
+            // Debug.Log($"[BasicEnemy] Usando Transform - nova posição: {transform.position}");
         }
 
         // Flip sprite
@@ -99,12 +144,15 @@ public class BasicEnemy : UnitBase
             spriteRenderer.flipX = direction.x < 0;
         }
 
-        // Se chegou perto do objetivo, ataca
-        float distance = Vector2.Distance(transform.position, targetObjective.transform.position);
-        if (distance <= attackRange)
+        // Se chegou perto do objetivo, ataca (verificar se ainda existe)
+        if (targetObjective != null && targetObjective)
         {
-            currentTarget = targetObjective.transform;
-            ChangeState(UnitState.Attacking);
+            float distance = Vector2.Distance(transform.position, targetObjective.transform.position);
+            if (distance <= attackRange)
+            {
+                currentTarget = targetObjective.transform;
+                ChangeState(UnitState.Attacking);
+            }
         }
     }
 

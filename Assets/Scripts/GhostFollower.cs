@@ -9,6 +9,7 @@ public class GhostFollower : MonoBehaviour
     private GameObject realPrefab;
     private int cost;
     private bool isStructure;
+    private int unitsToSpawn = 1; // Quantidade de unidades a spawnar
 
     private SpriteRenderer sr;
     private Color normalColor;
@@ -22,12 +23,13 @@ public class GhostFollower : MonoBehaviour
         blockedColor = new Color(1f, 0.3f, 0.3f, 0.5f);
     }
 
-    public void Init(UnitCardUI owner, GameObject prefab, int placeCost, bool isStruct)
+    public void Init(UnitCardUI owner, GameObject prefab, int placeCost, bool isStruct, int unitCount = 1)
     {
         cardOwner = owner;
         realPrefab = prefab;
         cost = placeCost;
         isStructure = isStruct;
+        unitsToSpawn = unitCount;
     }
 
     void Update()
@@ -99,7 +101,7 @@ public class GhostFollower : MonoBehaviour
         {
             if (canPlace)
             {
-                PlacerManager.Instance.RequestPlace(realPrefab, worldPos, cost, isStructure);
+                PlacerManager.Instance.RequestPlaceMultiple(realPrefab, worldPos, cost, isStructure, unitsToSpawn);
                 if (cardOwner != null) cardOwner.CancelPlacement();
             }
         }

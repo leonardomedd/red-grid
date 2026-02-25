@@ -7,6 +7,9 @@ public class UnitCardUI : MonoBehaviour
     public GameObject unitPrefab;   // prefab real to spawn
     public int cost = 1;
     public bool isStructure = false;
+    [Header("Multiple Units")]
+    [Tooltip("Quantidade de unidades a spawnar (ex: 3 para operários)")]
+    public int unitsPerPlacement = 1;
 
     private GameObject currentGhost;
 
@@ -29,7 +32,7 @@ public class UnitCardUI : MonoBehaviour
         GhostFollower gf = currentGhost.GetComponent<GhostFollower>();
         if (gf != null)
         {
-            gf.Init(this, unitPrefab, cost, isStructure);
+            gf.Init(this, unitPrefab, cost, isStructure, unitsPerPlacement);
         }
         else
         {
