@@ -145,22 +145,7 @@ Assets/
 - **Código:** C# com comentários em português
 - **Cenas:** Salve sempre antes de commitar
 
----
 
-## 📚 Documentação
-
-- [GDD Completo](https://docs.google.com/document/d/1EWAGpJmRFijgyJ7zyK1wJJzKamnfXZGRU_ZONwNW67k/edit?tab=t.0#heading=h.1zui15deflmj)
-- **[Sistema de Combate](COMBAT_SYSTEM.md)** - Documentação completa da IA e mecânicas de luta
-- **[Sistema de Ondas](WAVE_SYSTEM_SETUP.md)** - Guia de configuração do WaveManager
-- [Mecânicas](docs/MECHANICS.md) *(criar depois)*
-- [Arte e Estilo](docs/ART_STYLE.md) *(criar depois)*
-
----
-
-## 👥 Equipe
-
-- **Leonardo Almeida** - Desenvolvedor Principal e Game Designer
-- *(adicione os membros da equipe aqui)*
 
 ---
 
