@@ -1,4 +1,4 @@
-# Red Grid: Rise of the Comrades
+# Red Grid
 
 ## 📋 Sobre o Projeto
 

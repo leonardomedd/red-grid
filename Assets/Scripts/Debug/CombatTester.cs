@@ -7,7 +7,7 @@ using UnityEngine;
 public class CombatTester : MonoBehaviour
 {
     [Header("Prefabs")]
-    public GameObject comradePrefab;
+    public GameObject recruitPrefab;
     public GameObject brigadePrefab;
     public GameObject enemyPrefab;
 
@@ -36,8 +36,8 @@ public class CombatTester : MonoBehaviour
                 0
             );
 
-            // Alterna entre Comrade e Brigade
-            GameObject prefab = (i % 2 == 0) ? comradePrefab : brigadePrefab;
+            // Alterna entre Recruit e Brigade
+            GameObject prefab = (i % 2 == 0) ? recruitPrefab : brigadePrefab;
             if (prefab != null)
             {
                 Instantiate(prefab, spawnPos, Quaternion.identity);

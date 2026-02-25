@@ -1,12 +1,12 @@
 using UnityEngine;
 
 /// <summary>
-/// Comrade Recruit - Unidade básica de infantaria.
+/// Recruit - Unidade básica de infantaria.
 /// Baixo custo, stats balanceados, versátil.
 /// </summary>
-public class ComradeRecruit : UnitBase
+public class Recruit : UnitBase
 {
-    [Header("Comrade Recruit Settings")]
+    [Header("Recruit Settings")]
     [SerializeField] private float moralBonus = 1f; // Bonus de moral quando sobrevive
 
     protected override void Awake()
@@ -33,8 +33,8 @@ public class ComradeRecruit : UnitBase
             collider.isTrigger = false;
         }
 
-        // Stats específicos do Operário
-        unitName = "Comrade Recruit";
+        // Stats específicos do Recruta
+        unitName = "Recruit";
         maxHealth = 50f;
         currentHealth = maxHealth;
         damage = 8f;
